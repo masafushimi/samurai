@@ -1,0 +1,168 @@
+import React, { useState, useRef } from 'react';
+import { Users } from 'lucide-react';
+
+const DrinkingRoulette = () => {
+  const members = ['ツカサ', 'ユウタ', 'ヨシキ', 'ユウコ', 'タカノリ', 'フミカズ', 'フシミ'];
+  const [rotation, setRotation] = useState(0);
+  const [isSpinning, setIsSpinning] = useState(false);
+  const [selectedMember, setSelectedMember] = useState(null);
+  const [order, setOrder] = useState([]);
+  
+  const colors = [
+    '#FF6B6B', '#4ECDC4', '#FFE66D', '#A8E6CF', 
+    '#FF8B94', '#B4A7D6', '#FFD93D'
+  ];
+
+  const spinRoulette = () => {
+    if (isSpinning) return;
+    
+    setIsSpinning(true);
+    setSelectedMember(null);
+    
+    const availableMembers = members.filter(m => !order.includes(m));
+    if (availableMembers.length === 0) {
+      setIsSpinning(false);
+      return;
+    }
+    
+    const targetIndex = members.indexOf(
+      availableMembers[Math.floor(Math.random() * availableMembers.length)]
+    );
+    
+    const segmentAngle = 360 / members.length;
+    const targetAngle = targetIndex * segmentAngle;
+    const spins = 5;
+    const finalRotation = rotation + (360 * spins) + (360 - targetAngle) + (segmentAngle / 2);
+    
+    setRotation(finalRotation);
+    
+    setTimeout(() => {
+      setIsSpinning(false);
+      const selected = members[targetIndex];
+      setSelectedMember(selected);
+      setOrder([...order, selected]);
+    }, 4000);
+  };
+
+  const reset = () => {
+    setRotation(0);
+    setSelectedMember(null);
+    setOrder([]);
+    setIsSpinning(false);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex flex-col items-center justify-center p-8">
+      <div className="text-center mb-8">
+        <h1 className="text-5xl font-bold text-white mb-2 flex items-center justify-center gap-3">
+          <Users size={48} />
+          吐露の順番ルーレット
+        </h1>
+        <p className="text-blue-200 text-lg">次は誰が吐露する番？</p>
+      </div>
+
+      <div className="relative mb-8">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-6 z-20">
+          <div className="w-0 h-0 border-l-[20px] border-r-[20px] border-t-[40px] border-l-transparent border-r-transparent border-t-yellow-400 drop-shadow-lg"></div>
+        </div>
+        
+        <div className="relative w-96 h-96 rounded-full overflow-hidden shadow-2xl border-8 border-yellow-400">
+          <svg
+            viewBox="0 0 400 400"
+            className="w-full h-full transition-transform duration-[4000ms] ease-out"
+            style={{ transform: `rotate(${rotation}deg)` }}
+          >
+            {members.map((member, index) => {
+              const angle = (360 / members.length) * index;
+              const nextAngle = (360 / members.length) * (index + 1);
+              const startRad = (angle * Math.PI) / 180;
+              const endRad = (nextAngle * Math.PI) / 180;
+              
+              const x1 = 200 + 200 * Math.cos(startRad);
+              const y1 = 200 + 200 * Math.sin(startRad);
+              const x2 = 200 + 200 * Math.cos(endRad);
+              const y2 = 200 + 200 * Math.sin(endRad);
+              
+              const textAngle = angle + (360 / members.length) / 2;
+              const textRad = (textAngle * Math.PI) / 180;
+              const textX = 200 + 130 * Math.cos(textRad);
+              const textY = 200 + 130 * Math.sin(textRad);
+              
+              const isUsed = order.includes(member);
+              
+              return (
+                <g key={member}>
+                  <path
+                    d={`M 200 200 L ${x1} ${y1} A 200 200 0 0 1 ${x2} ${y2} Z`}
+                    fill={isUsed ? '#666' : colors[index]}
+                    stroke="white"
+                    strokeWidth="2"
+                    opacity={isUsed ? 0.3 : 1}
+                  />
+                  <text
+                    x={textX}
+                    y={textY}
+                    fill="white"
+                    fontSize="24"
+                    fontWeight="bold"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    transform={`rotate(${textAngle + 90}, ${textX}, ${textY})`}
+                    style={{ textDecoration: isUsed ? 'line-through' : 'none' }}
+                  >
+                    {member}
+                  </text>
+                </g>
+              );
+            })}
+            <circle cx="200" cy="200" r="30" fill="white" />
+          </svg>
+        </div>
+      </div>
+
+      {selectedMember && (
+        <div className="mb-6 text-center animate-bounce">
+          <div className="bg-white rounded-2xl px-8 py-4 shadow-2xl">
+            <p className="text-gray-600 text-sm mb-1">次の話者</p>
+            <p className="text-4xl font-bold text-purple-600">{selectedMember}</p>
+          </div>
+        </div>
+      )}
+
+      <div className="flex gap-4 mb-8">
+        <button
+          onClick={spinRoulette}
+          disabled={isSpinning || order.length === members.length}
+          className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-12 py-4 rounded-full text-xl font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+        >
+          {isSpinning ? '回転中...' : order.length === members.length ? '全員選ばれました！' : 'ルーレットを回す'}
+        </button>
+        
+        <button
+          onClick={reset}
+          className="bg-gray-700 text-white px-8 py-4 rounded-full text-xl font-bold shadow-lg hover:bg-gray-600 transition-all"
+        >
+          リセット
+        </button>
+      </div>
+
+      {order.length > 0 && (
+        <div className="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-6 max-w-md w-full">
+          <h3 className="text-white text-2xl font-bold mb-4 text-center">話す順番</h3>
+          <ol className="space-y-2">
+            {order.map((member, index) => (
+              <li key={index} className="text-white text-lg flex items-center gap-3">
+                <span className="bg-yellow-400 text-purple-900 font-bold w-8 h-8 rounded-full flex items-center justify-center">
+                  {index + 1}
+                </span>
+                {member}
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default DrinkingRoulette;
