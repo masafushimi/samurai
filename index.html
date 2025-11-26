@@ -12,7 +12,7 @@
         }
         body {
             min-height: 100vh;
-            background: linear-gradient(135deg, #581c87 0%, #1e3a8a 50%, #312e81 100%);
+            background: #1a0a0a;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         .container {
@@ -30,15 +30,16 @@
         .title {
             font-size: 3rem;
             font-weight: bold;
-            color: white;
+            color: #d4af37;
             margin-bottom: 0.5rem;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
         .subtitle {
-            color: #bfdbfe;
+            color: #d4af37;
             font-size: 1.125rem;
         }
         .roulette-container {
@@ -55,8 +56,8 @@
             height: 0;
             border-left: 20px solid transparent;
             border-right: 20px solid transparent;
-            border-bottom: 40px solid #fbbf24;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+            border-bottom: 40px solid #d4af37;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
         }
         .roulette-wheel-container {
             position: relative;
@@ -64,8 +65,8 @@
             height: 384px;
             border-radius: 50%;
             overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-            border: 8px solid #fbbf24;
+            box-shadow: 0 0 60px rgba(212, 175, 55, 0.4), 0 25px 50px -12px rgba(0,0,0,0.8);
+            background: #2a1a0a;
         }
         .roulette-wheel {
             width: 100%;
@@ -95,7 +96,7 @@
         .result-name {
             font-size: 2.25rem;
             font-weight: bold;
-            color: #9333ea;
+            color: #d4af37;
         }
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
@@ -126,8 +127,8 @@
             transform: none;
         }
         .btn-spin {
-            background: linear-gradient(to right, #ec4899, #9333ea);
-            color: white;
+            background: linear-gradient(to right, #d4af37, #f4e4b8);
+            color: #1a0a0a;
         }
         .btn-reset {
             background: #374151;
@@ -167,8 +168,8 @@
             margin-bottom: 0.5rem;
         }
         .order-number {
-            background: #fbbf24;
-            color: #581c87;
+            background: #d4af37;
+            color: #1a0a0a;
             font-weight: bold;
             width: 2rem;
             height: 2rem;
@@ -221,7 +222,7 @@
 
     <script>
         const members = ['ツカサ', 'ユウタ', 'ヨシキ', 'ユウコ', 'タカノリ', 'フミカズ', 'フシミ'];
-        const colors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#A8E6CF', '#FF8B94', '#B4A7D6', '#FFD93D'];
+        const colors = ['#ff3333', '#ff3333', '#ff3333', '#ff3333', '#ff3333', '#ff3333', '#ff3333'];
         
         let rotation = 0;
         let isSpinning = false;
@@ -238,36 +239,56 @@
         function drawRoulette() {
             rouletteSvg.innerHTML = '';
             
+            // 赤い円盤
+            const mainCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            mainCircle.setAttribute('cx', '200');
+            mainCircle.setAttribute('cy', '200');
+            mainCircle.setAttribute('r', '180');
+            mainCircle.setAttribute('fill', '#ff3333');
+            rouletteSvg.appendChild(mainCircle);
+            
+            // ゴールドの外枠
+            const outerRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            outerRing.setAttribute('cx', '200');
+            outerRing.setAttribute('cy', '200');
+            outerRing.setAttribute('r', '185');
+            outerRing.setAttribute('fill', 'none');
+            outerRing.setAttribute('stroke', '#d4af37');
+            outerRing.setAttribute('stroke-width', '50');
+            rouletteSvg.appendChild(outerRing);
+            
             members.forEach((member, index) => {
                 const angle = (360 / members.length) * index;
                 const nextAngle = (360 / members.length) * (index + 1);
-                const startRad = (angle * Math.PI) / 180;
-                const endRad = (nextAngle * Math.PI) / 180;
                 
-                const x1 = 200 + 200 * Math.cos(startRad);
-                const y1 = 200 + 200 * Math.sin(startRad);
-                const x2 = 200 + 200 * Math.cos(endRad);
-                const y2 = 200 + 200 * Math.sin(endRad);
+                // 白い区切り線
+                const lineAngle = nextAngle;
+                const lineRad = (lineAngle * Math.PI) / 180;
+                const lineX = 200 + 160 * Math.cos(lineRad);
+                const lineY = 200 + 160 * Math.sin(lineRad);
                 
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', '200');
+                line.setAttribute('y1', '200');
+                line.setAttribute('x2', lineX);
+                line.setAttribute('y2', lineY);
+                line.setAttribute('stroke', 'white');
+                line.setAttribute('stroke-width', '3');
+                rouletteSvg.appendChild(line);
+                
+                // テキスト（ゴールドの枠の上に白文字で配置）
                 const textAngle = angle + (360 / members.length) / 2;
                 const textRad = (textAngle * Math.PI) / 180;
-                const textX = 200 + 130 * Math.cos(textRad);
-                const textY = 200 + 130 * Math.sin(textRad);
+                const textX = 200 + 180 * Math.cos(textRad);
+                const textY = 200 + 180 * Math.sin(textRad);
                 
                 const isUsed = order.includes(member);
-                
-                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                path.setAttribute('d', `M 200 200 L ${x1} ${y1} A 200 200 0 0 1 ${x2} ${y2} Z`);
-                path.setAttribute('fill', isUsed ? '#666' : colors[index]);
-                path.setAttribute('stroke', 'white');
-                path.setAttribute('stroke-width', '2');
-                path.setAttribute('opacity', isUsed ? '0.3' : '1');
                 
                 const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                 text.setAttribute('x', textX);
                 text.setAttribute('y', textY);
-                text.setAttribute('fill', 'white');
-                text.setAttribute('font-size', '24');
+                text.setAttribute('fill', isUsed ? '#666' : 'white');
+                text.setAttribute('font-size', '20');
                 text.setAttribute('font-weight', 'bold');
                 text.setAttribute('text-anchor', 'middle');
                 text.setAttribute('dominant-baseline', 'middle');
@@ -277,16 +298,16 @@
                 }
                 text.textContent = member;
                 
-                rouletteSvg.appendChild(path);
                 rouletteSvg.appendChild(text);
             });
             
-            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-            circle.setAttribute('cx', '200');
-            circle.setAttribute('cy', '200');
-            circle.setAttribute('r', '30');
-            circle.setAttribute('fill', 'white');
-            rouletteSvg.appendChild(circle);
+            // 中央の円
+            const centerCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            centerCircle.setAttribute('cx', '200');
+            centerCircle.setAttribute('cy', '200');
+            centerCircle.setAttribute('r', '20');
+            centerCircle.setAttribute('fill', 'white');
+            rouletteSvg.appendChild(centerCircle);
         }
 
         function updateOrderList() {
@@ -368,4 +389,3 @@
     </script>
 </body>
 </html>
-Claude
